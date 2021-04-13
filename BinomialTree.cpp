@@ -1,11 +1,10 @@
 #include "BinomialTree.h"
 
-void BinomialTree::createPriceTree(float currStockPrice){
-    //Create layer array
-    layersOfNodes= std::make_unique<std::unique_ptr<PriceNode[]>[]>(steps);
+void BinomialTree::createPriceTree(){
     //Numer of nodes at beggining of tree
-    int numOfNodes = 1;
-    layersOfNodes[0] = std::make_unique<PriceNode[]>(numOfNodes);
+    layersOfNodes = std::make_unique<std::unique_ptr<PriceNode[]>[]>(steps);
+    //Create beginning node
+    layersOfNodes[0] = std::make_unique<PriceNode[]>(1);
     layersOfNodes[0][0].stockPrice = currStockPrice;
 
     //ParentLayer is a layer that is giving values for next nodes in the tree.
@@ -15,15 +14,15 @@ void BinomialTree::createPriceTree(float currStockPrice){
         //Allocate memory for new children!
         layersOfNodes[parentLayer+1] = std::make_unique<PriceNode[]>(numInLayer(parentLayer+1));
       
-        //Each node in layer
-        for(int nodeInLayer = 0; nodeInLayer < nodeInLayer; nodeInLayer++){
+        //Each node in parentLayer, assign amended price to children.
+        for(int nodeInLayer = 0; nodeInLayer < numInLayer(parentLayer); nodeInLayer++){
             layersOfNodes[parentLayer+1][2*nodeInLayer].stockPrice 
             = layersOfNodes[parentLayer][nodeInLayer].stockPrice * u;
             
             layersOfNodes[parentLayer+1][2*nodeInLayer+1].stockPrice 
             = layersOfNodes[parentLayer][nodeInLayer].stockPrice * d;
         }
-    }
+    } 
 };
 
 BinomialTree::BinomialTree(float currStockPrice, float u, float d, float r,
@@ -35,12 +34,12 @@ BinomialTree::BinomialTree(float currStockPrice, float u, float d, float r,
 };
 float BinomialTree::calculate(){
     //Allocate space in memory to keep all of the nodes  
-    createPriceTree(currStockPrice);
+    createPriceTree();
     return layersOfNodes[0][0].contractPrice;
-}
+};
 float BinomialTree::numInLayer(int layerNum){
     return 2^(layerNum);
-}
+};
 
 void BinomialTree::calculateOptionPrice(){
 //Actually pricing is only far calls EU
@@ -72,10 +71,10 @@ void BinomialTree::calculateOptionPrice(){
             }  
         }
     }
-}
+};
 
 int main(){
-    float currVal = BinomialTree(100,1.01,0.99,0.1,120,Call,1,2).calculate();
+    float currVal = BinomialTree(100,1.01,0.99,0.1,120,Call,1,15).calculate();
     std::cout<<currVal;
     return 0;
-}
+};

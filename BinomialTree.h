@@ -31,7 +31,7 @@ public:
     float calculate();
 
 protected:
-    void createPriceTree(float currStockPrice);
+    void createPriceTree();
     void calculateOptionPrice();
     float numInLayer(int layerNum);
 private:
