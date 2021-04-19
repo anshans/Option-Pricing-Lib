@@ -5,36 +5,37 @@
 #include <complex>
 #include <math.h>   
 
-/* simple pricing code based on Binomial trees
+/* Pricing method based on Binomial trees
     Work to do:
-    -Add pricing for many option types and regions,
-    -Accelerate using CUDA, since computation is highly pararell
-    -
+    -Add access to the American.
+    -Accelerate using CUDA, computation is highly pararell
 */
-
-
-enum OptionType{Call, Put};
-enum Region{Am, Eu};
 
 struct PriceNode{
     float stockPrice;
     float contractPrice;
 };
+enum OptionType{Eu,Am};
 
 class BinomialTree{
-public:
-    //Tree Constructors
+public: 
     BinomialTree(float currStockPrice, float u, float d, float r,
-    float strikePrice,
-    OptionType option, float T, int steps);
+    float strikePrice, float T, int steps);
+    //Constructor with volatility
+    BinomialTree(float currStockPrice, float vol, float r,
+    float strikePrice, float T, int steps);
+
     //ToDo do creator with volatility of stock
     float accessParticularOption();
-    float calculate();
+    float calculateEuropean();
+    float calculateAmerican();
 
 protected:
     void createPriceTree();
-    void calculateOptionPrice();
+    void calculateOption(OptionType optionType);
     int numInLayer(int layerNum);
+    float euContractValue(int layer, int j);
+    float earlyExecution(int layer, int j);
 private:
     float u;
     float d;
