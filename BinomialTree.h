@@ -25,7 +25,6 @@ public:
     BinomialTree(float currStockPrice, float vol, float r,
     float strikePrice, float T, int steps);
 
-    //ToDo do creator with volatility of stock
     float accessParticularOption();
     float calculateEuropean();
     float calculateAmerican();
@@ -44,6 +43,6 @@ private:
     int steps;
     float currStockPrice;
     float strikePrice;
-    //2-dimensional array, 
+    //Memory representation of Binomial tree
     std::unique_ptr<std::unique_ptr<PriceNode[]>[]> layersOfNodes;
 };

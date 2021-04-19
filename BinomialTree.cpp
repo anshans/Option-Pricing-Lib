@@ -43,7 +43,6 @@ float BinomialTree::calculateAmerican(){
     return layersOfNodes[0][0].contractPrice;
 };
 
-//Helpers
 int BinomialTree::numInLayer(int layerNum){
     //layerNum counts from 0 just like in unique_ptr array!
     return (layerNum+1);
@@ -68,8 +67,6 @@ void BinomialTree::calculateOption(OptionType optionType){
                     }
             }
         }
-
-        //DO FOR OTHER CONTRACTS
         //It's option value at expiration date.
         else{
             for(int j = 0; j<numOfNodes; j++){
