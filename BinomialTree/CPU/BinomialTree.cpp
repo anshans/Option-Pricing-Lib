@@ -1,5 +1,4 @@
-#include "BinomialTree.h"
-
+#include <BinomialTree.hpp>
 
 //Constructors
 BinomialTree::BinomialTree(float currStockPrice, float u, float d, float r,
@@ -11,6 +10,7 @@ BinomialTree::BinomialTree(float currStockPrice, float vol, float r,
     T(T),r(r),strikePrice(strikePrice),u(exp(vol*sqrt(T))),d(-exp(vol*sqrt(T))){
 };
 
+//---Creation of price tree---
 void BinomialTree::createPriceTree(){
     //Numer of nodes at beggining of tree
     layersOfNodes = std::make_unique<std::unique_ptr<PriceNode[]>[]>(steps);
@@ -31,25 +31,8 @@ void BinomialTree::createPriceTree(){
         }
     } 
 };
-float BinomialTree::calculateEuropean(){
-    //Allocate space in memory to keep all of the nodes  
-    createPriceTree();
-    calculateOption(Eu);
-    return layersOfNodes[0][0].contractPrice;
-};
-float BinomialTree::calculateAmerican(){
-    createPriceTree();
-    calculateOption(Am);
-    return layersOfNodes[0][0].contractPrice;
-};
-
-int BinomialTree::numInLayer(int layerNum){
-    //layerNum counts from 0 just like in unique_ptr array!
-    return (layerNum+1);
-};
-
+//---Calculation of derivatives---
 void BinomialTree::calculateOption(OptionType optionType){
-
     int numOfNodes;
     for(int layer=steps-1; layer >=0; layer--){
         numOfNodes = numInLayer(layer);
@@ -75,7 +58,23 @@ void BinomialTree::calculateOption(OptionType optionType){
             }  
         }
     }
-    
+};
+
+//---Helpers
+float BinomialTree::calculateEuropean(){
+    //Allocate space in memory to keep all of the nodes  
+    createPriceTree();
+    calculateOption(Eu);
+    return layersOfNodes[0][0].contractPrice;
+};
+float BinomialTree::calculateAmerican(){
+    createPriceTree();
+    calculateOption(Am);
+    return layersOfNodes[0][0].contractPrice;
+};
+int BinomialTree::numInLayer(int layerNum){
+    //layerNum counts from 0 just like in unique_ptr array!
+    return (layerNum+1);
 };
 float BinomialTree::euContractValue(int layer, int j){
     //For nodes deeper within the tree, equation 13.2 from Hull book
@@ -86,9 +85,3 @@ float BinomialTree::euContractValue(int layer, int j){
     //13.2 Hull
     return exp(-r*T)*(p*fu+(1-p)*fd);
 }
-
-int main(){
-    float currVal = BinomialTree(20,1.1,0.9,0.12,21,0.25,3).calculateEuropean();
-    std::cout<<"Result: "<<currVal<<"\n";
-    return 0;
-};

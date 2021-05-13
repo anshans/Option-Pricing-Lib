@@ -1,24 +1,15 @@
+#pragma once
 #include <stdio.h>
 #include <iostream>
 #include <ctime>
 #include <memory>
 #include <complex>
-#include <math.h>   
-
-/* Pricing method based on Binomial trees
-    Work to do:
-    -Add access to the American.
-    -Accelerate using CUDA, computation is highly pararell
-*/
-
-struct PriceNode{
-    float stockPrice;
-    float contractPrice;
-};
-enum OptionType{Eu,Am};
+#include <math.h>
+#include <../DataStructures/OptionStructures.hpp>
 
 class BinomialTree{
 public: 
+    //Constructor with u and d. Both values are provided as percentage i.e. 
     BinomialTree(float currStockPrice, float u, float d, float r,
     float strikePrice, float T, int steps);
     //Constructor with volatility
