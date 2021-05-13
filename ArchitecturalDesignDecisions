@@ -1,0 +1,2 @@
+The library could be made using only one class and methods for gpu and cpu although there is
+one caveat with this approach. Cuda binary cannot run on AMD gpu.

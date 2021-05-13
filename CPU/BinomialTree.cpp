@@ -1,5 +1,4 @@
-#include "BinomialTree.h"
-
+#include <BinomialTree.hpp>
 
 //Constructors
 BinomialTree::BinomialTree(float currStockPrice, float u, float d, float r,
@@ -86,11 +85,3 @@ float BinomialTree::euContractValue(int layer, int j){
     //13.2 Hull
     return exp(-r*T)*(p*fu+(1-p)*fd);
 }
-
-
-
-int main(){
-    float currVal = BinomialTree(50,)
-    std::cout<<"Result: "<<currVal<<"\n";
-    return 0;
-};

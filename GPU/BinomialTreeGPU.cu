@@ -1,14 +1,14 @@
-#include "BinomialTreeGPU.h"
+#include "BinomialTreeGPU.hpp"
 //Constructors
-BinomialTree::BinomialTree(float currStockPrice, float u, float d, float r,
+BinomialTreeGPU::BinomialTreeGPU(float currStockPrice, float u, float d, float r,
                            float strikePrice, float T, int steps) : u(u), d(d), currStockPrice(currStockPrice), steps(steps),
                                                                     T(T), r(r), strikePrice(strikePrice){};
-BinomialTree::BinomialTree(float currStockPrice, float vol, float r,
+BinomialTreeGPU::BinomialTreeGPU(float currStockPrice, float vol, float r,
                            float strikePrice, float T, int steps) : currStockPrice(currStockPrice), steps(steps),
                                                                     T(T), r(r), strikePrice(strikePrice), u(exp(vol * sqrt(T))), d(-exp(vol * sqrt(T))){};
 
-//---Creation of price tree---
-void BinomialTree::createPriceTree()
+// Creation of pricce tree
+void BinomialTreeGPU::createPriceTree()
 {
     //Numer of nodes at beggining of tree
     //layersOfNodes = std::make_unique<std::unique_ptr<PriceNode[]>[]>(steps);
@@ -18,19 +18,17 @@ void BinomialTree::createPriceTree()
     layersOfNodes[0][0].stockPrice = currStockPrice;
     //Previous layer(parentLayer) is giving values to next layer (parentLayer+1)
     //Last layer, can't have leaves therefore there is steps - 1.
-
-    // TODO: Decide how to create a setup configuration for kernel.
-    fillPriceTree<<<1, 8>>>(layersOfNodes, steps, u, d, &BinomialTree::numInLayer);
+    fillPriceTree<<<1, 8>>>(layersOfNodes, steps, u, d, &BinomialTreeGPU::numInLayer);
 };
+
 __global__ void fillPriceTree(PriceNode **layersOfNodes, int steps, float u, float d, LayerCalculation layerFunction)
 {
     //To get better understanding what is going here, check "An Even Easier Introduction to CUDA"
-
     int index = threadIdx.x;
     int stride = blockDim.x;
+    //Allocate memory for nodes and calculate stock prices for each node.
     for (int parentLayer = 0; parentLayer < steps - 1; parentLayer++)
     {
-        //Allocate memory for new children!
         layersOfNodes[parentLayer + 1] = new PriceNode[layerFunction(parentLayer + 1)];
 
         for (int nodeInParentLayer = index; nodeInParentLayer < layerFunction(parentLayer); nodeInParentLayer += stride)
@@ -41,8 +39,8 @@ __global__ void fillPriceTree(PriceNode **layersOfNodes, int steps, float u, flo
     }
 };
 
-//---Calculation of derivatives---
-void BinomialTree::calculateOption(OptionType optionType)
+//Calculation of derivative price.
+void BinomialTreeGPU::calculateOption(OptionType optionType)
 {
     int numOfNodes;
     float p = (exp(r * T) - d) / (u - d);
@@ -53,8 +51,7 @@ void BinomialTree::calculateOption(OptionType optionType)
 
         if (layer < steps - 1)
         {
-            // TODO: think about configuration of kernel.
-            calculateContractLayer<<<1,8>>>(layersOfNodes, layer, p, strikePrice, numOfNodes, T, r, optionType, BinomialTree::euContractValue);
+            calculateContractLayer<<<1,8>>>(layersOfNodes, layer, p, strikePrice, numOfNodes, T, r, optionType, BinomialTreeGPU::euContractValue);
         }
         //It's option value at expiration date.
         else
@@ -87,7 +84,7 @@ __global__ void calculateContractLayer(PriceNode **layersOfNodes, int layer, flo
     }
 }
 
-float BinomialTree::euContractValue(PriceNode** layersOfNodes, int layer, int j, float p, float T, float r)
+float BinomialTreeGPU::euContractValue(PriceNode** layersOfNodes, int layer, int j, float p, float T, float r)
 {
     //For nodes deeper within the tree, equation 13.2 from Hull book
     //is being used.
@@ -97,27 +94,20 @@ float BinomialTree::euContractValue(PriceNode** layersOfNodes, int layer, int j,
     return __exp(-r * T) * (p * fu + (1 - p) * fd);
 };
 
-float BinomialTree::calculateEuropean()
+float BinomialTreeGPU::calculateEuropean()
 {
-    //Allocate space in memory to keep all of the nodes
     createPriceTree();
     calculateOption(Eu);
     return layersOfNodes[0][0].contractPrice;
 };
-float BinomialTree::calculateAmerican()
+float BinomialTreeGPU::calculateAmerican()
 {
     createPriceTree();
     calculateOption(Am);
     return layersOfNodes[0][0].contractPrice;
 };
-int BinomialTree::numInLayer(int layerNum)
+int BinomialTreeGPU::numInLayer(int layerNum)
 {
     //layerNum counts from 0 just like in unique_ptr array!
     return (layerNum + 1);
-};
-
-int main()
-{
-    std::cout << "Result: " << 69 << "\n";
-    return 0;
 };

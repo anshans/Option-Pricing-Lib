@@ -1,36 +1,24 @@
+#pragma once
 #include <stdio.h>
 #include <iostream>
 #include <ctime>
 #include <memory>
 #include <complex>
 #include <math.h>
-
-/* Pricing method based on Binomial trees */
-// TODO: Making this code more readable.
-//Data structures
-struct PriceNode
-{
-    float stockPrice;
-    float contractPrice;
-};
-enum OptionType
-{
-    Eu,
-    Am
-};
+#include <../DataStructures/OptionStructures.hpp>
 
 //GPU functions
 using LayerCalculation = int (*)(int);
 using ContractCalculation = float (*)(PriceNode **, int, int, float, float, float);
 
 //Classes
-class BinomialTree
+class BinomialTreeGPU
 {
 public:
-    BinomialTree(float currStockPrice, float u, float d, float r,
+    BinomialTreeGPU(float currStockPrice, float u, float d, float r,
                  float strikePrice, float T, int steps);
     //Constructor with volatility
-    BinomialTree(float currStockPrice, float vol, float r,
+    BinomialTreeGPU(float currStockPrice, float vol, float r,
                  float strikePrice, float T, int steps);
     //Destructor
 
